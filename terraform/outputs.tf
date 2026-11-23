@@ -1,28 +1,25 @@
-output "resource_group_name" {
-  value = azurerm_resource_group.project.name
+output "resource_group" {
+  value = azurerm_resource_group.main.name
 }
 
-output "webserver_public_ip" {
-  description = "Public IP used to open the WordPress website and connect from Ansible."
-  value       = azurerm_public_ip.web.ip_address
+output "vm_names" {
+  value = { for k, v in module.vm : k => v.name }
 }
 
-output "webserver_private_ip" {
-  value = azurerm_network_interface.web.private_ip_address
+output "private_ips" {
+  description = "Private IPs Ansible uses between hosts."
+  value       = { for k, v in module.vm : k => v.private_ip }
 }
 
-output "database_private_ip" {
-  value = azurerm_network_interface.database.private_ip_address
+output "public_ips" {
+  description = "Public IPs (control = SSH entry point, web = WordPress site)."
+  value       = { for k, v in module.vm : k => v.public_ip }
 }
 
-output "webserver_vm_name" {
-  value = azurerm_linux_virtual_machine.web.name
+output "wordpress_url" {
+  value = "http://${module.vm["web"].public_ip}"
 }
 
-output "database_vm_name" {
-  value = azurerm_linux_virtual_machine.database.name
-}
-
-output "ssh_username" {
-  value = var.admin_username
+output "ssh_to_control" {
+  value = "ssh ${var.admin_username}@${module.vm["control"].public_ip}"
 }
